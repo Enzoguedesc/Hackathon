@@ -1,0 +1,79 @@
+/* body {
+    background: #f0f2f5;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.chat-container h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.chat-box {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.msg {
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.msg.usuário {
+    color: #333;
+    font-weight: bold;
+}
+
+.msg.jurisbot {
+    color: #4a90e2;
+}
+
+.chat-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-form input[type="text"] {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.chat-form button {
+    padding: 0.75rem 1rem;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.logout-btn {
+    margin-top: 1rem;
+    width: 100%;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+} */
