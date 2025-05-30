@@ -21,7 +21,7 @@ O mapa mental do projeto "Veritas Juris" foi estruturado para refletir as princi
 A seguir, é apresentado o mapa mental do projeto "Veritas Juris". Ele consolida visualmente os elementos chave da iniciativa, conforme discutido e refinado para o "Desafio de IA - o uso aplicado de ferramentas de Inteligência Artificial Generativa" do Ibmec[cite: 1].
 </p>
 
-[![Mapa mental - Verita Juris](/docs/assets/mapa_mental_hackaton.svg)](/docs/assets/mapa_mental_hackaton.svg)
+[![Mapa mental - Verita Juris](../assets/mapa_mental_hackaton.svg)]
 
 <p align = "justify">
 Este mapa mental serve como um guia visual rápido para entender a essência e a estrutura do Veritas Juris, facilitando a compreensão dos seus objetivos.
