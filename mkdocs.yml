@@ -1,0 +1,6 @@
+site_name: Veritas Juris Docs
+nav:
+  - Iniciação: docs/_Iniciação/5w2h.md
+docs_dir: docs
+theme:
+  name: mkdocs
