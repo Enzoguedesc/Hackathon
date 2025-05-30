@@ -118,7 +118,6 @@ st.sidebar.warning("⚠️ Lembre-se: Esta é uma ferramenta de demonstração p
 
 # Exibir informações sobre os dados carregados
 if initial_documents_global:
-    st.sidebar.markdown("---")
     st.sidebar.subheader(f"Documentos Carregados na Base:")
     st.sidebar.caption(f"{len(initial_documents_global)} documento(s) principal(is) carregado(s) de:")
     st.sidebar.code(os.path.basename(data_file_path), language=None)
@@ -181,20 +180,6 @@ if st.button("Analisar e Responder", type="primary"):
                         
                         if displayed_ementas_count == 0 and source_files_from_chunks:
                             st.caption("Ementas não disponíveis para os documentos referenciados ou não foram extraídas corretamente.")
-
-
-                    st.markdown("---")
-
-                # 3. OPCIONAL: MANTER O EXPANDER DOS CHUNKS DETALHADOS
-                if relevant_chunks_data:
-                    with st.expander("Ver Trechos Detalhados Consultados (Chunks)"):
-                        for i, chunk_data_detail in enumerate(relevant_chunks_data):
-                            # chunk_data_detail agora é o objeto completo do chunk, incluindo seus metadados
-                            st.write(f"**Trecho {i+1} (Fonte: {chunk_data_detail['metadata_chunk']['source_document']})**")
-                            st.caption(f"Texto do Chunk: {chunk_data_detail['text_chunk']}")
-                            # Você pode optar por mostrar outros metadados do chunk aqui, se desejar
-                            # st.json(chunk_data_detail['metadata_chunk']) # Para depuração
-                            st.markdown("---")
 
             except Exception as e:
                 st.error(f"Ocorreu um erro ao processar sua solicitação: {e}")
