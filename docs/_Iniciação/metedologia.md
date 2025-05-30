@@ -2,10 +2,8 @@
 id: metodologia
 title: Metodologia
 ---
- 
- 
+
 ## Introdução
- 
 <p align = "justify">
 A metodologia pode ser definida como a sistematização de métodos e técnicas com o intuito de se alcançar um objetivo. Este documento aborda os métodos e técnica de metodologias, processos e práticas (Scrum, XP, Kanban, RUP) de acordo com o objetivo da equipe e da disciplina.
 </p>
