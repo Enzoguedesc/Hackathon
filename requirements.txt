@@ -17,3 +17,8 @@ watchdog==6.0.0
 flask
 flask-wtf
 wtforms
+streamlit
+python-dotenv
+google-generativeai  # Para usar a API do Gemini (Google AI)
+sentence-transformers # Para gerar os embeddings
+faiss-cpu             # Para o vector store (alternativa: chromadb)
