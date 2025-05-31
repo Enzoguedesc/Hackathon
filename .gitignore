@@ -1,0 +1,19 @@
+# Bytecode do Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Ambiente virtual
+venv/
+.env/
+
+# Arquivos de IDEs
+.vscode/
+.idea/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+
+.venv
