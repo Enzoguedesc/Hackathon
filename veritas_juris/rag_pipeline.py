@@ -7,14 +7,26 @@ import numpy as np
 import google.generativeai as genai
 
 
+# rag_pipeline.py
+
 def mock_ai_analysis(text):
-    # Simulação de análise de IA
+    """Simulação de análise baseada em IA."""
     return {
-        "resumo": "Resumo fictício do texto.",
-        "entendimento": "Análise superficial gerada por IA fictícia.",
+        "resumo": "Este é um resumo simulado do conteúdo legal submetido.",
+        "entendimento": "Entendimento básico da situação jurídica conforme simulação.",
         "possiveis_violacoes": ["Artigo 5º, Inciso II", "Artigo 7º, Inciso XXII"],
         "resposta_recomendada": "Responder com base nos princípios constitucionais indicados."
     }
+
+def mock_generate_argument_variations(text):
+    """Simulação de geração de variações de argumentos jurídicos."""
+    return [
+        "Argumento baseado no princípio da legalidade.",
+        "Argumento considerando jurisprudência recente.",
+        "Argumento enfatizando os direitos fundamentais.",
+        "Argumento focado no direito ao contraditório e ampla defesa."
+    ]
+
 
 
 # --- Configuração Inicial (sem alterações) ---
