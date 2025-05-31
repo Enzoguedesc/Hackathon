@@ -6,6 +6,17 @@ import faiss
 import numpy as np
 import google.generativeai as genai
 
+
+def mock_ai_analysis(text):
+    # Simulação de análise de IA
+    return {
+        "resumo": "Resumo fictício do texto.",
+        "entendimento": "Análise superficial gerada por IA fictícia.",
+        "possiveis_violacoes": ["Artigo 5º, Inciso II", "Artigo 7º, Inciso XXII"],
+        "resposta_recomendada": "Responder com base nos princípios constitucionais indicados."
+    }
+
+
 # --- Configuração Inicial (sem alterações) ---
 def configure_llm():
     """Configura e retorna o cliente do LLM (ex: Google Gemini)."""

@@ -2,21 +2,23 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 
-# Importar as funções do seu pipeline RAG (ajustado)
+# Importar as funções do pipeline RAG
 from rag_pipeline import (
     configure_llm,
     initialize_embedding_model,
-    load_processes_from_original_json, # <<< ATUALIZADO para a função que lê o JSON original
+    load_processes_from_original_json,
     process_documents_for_rag,
     create_vector_store,
     retrieve_relevant_chunks,
-    generate_response_with_llm
+    generate_response_with_llm,
+    mock_ai_analysis,
+    mock_generate_argument_variations
 )
 
-# --- 1. Configuração da Página e Setup Inicial ---
+# --- 1. Configuração da Página ---
 st.set_page_config(
     page_title="VeritasJuris IA Pro",
-    page_icon="✨",  # Um ícone mais "brilhante"
+    page_icon="✨",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -28,163 +30,190 @@ st.set_page_config(
         """
     }
 )
-# Remover o st.title() original se você usar este markdown
-st.markdown("<h1 style='text-align: center; color: #2A7257;'>⚖️ VeritasJuris IA</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 18px;'>Sua assistente inteligente para análise de jurisprudência tributária.</p>", unsafe_allow_html=True)
-st.markdown("---") # Linha divisória
 
-# Carregar variáveis de ambiente
+# --- Sidebar ---
+with st.sidebar:
+    st.header("Painel de Controle")
+
+    st.subheader("1. Insira a Jurisprudência")
+    jurisprudence_source = st.radio(
+        "Origem do texto:",
+        ("Colar Texto", "Carregar Arquivo TXT (em breve)"),
+        key="source_select"
+    )
+
+    jurisprudence_text_area = ""
+    if jurisprudence_source == "Colar Texto":
+        jurisprudence_text_area = st.text_area(
+            "Cole o texto completo da decisão/acórdão aqui:",
+            height=250,
+            placeholder="Ex: EMENTA: HABEAS CORPUS. PACIENTE PRESO PREVENTIVAMENTE..."
+        )
+    else:
+        st.info("Funcionalidade de upload de arquivo será implementada em breve.")
+
+    analyze_button = st.button("🔍 Analisar Jurisprudência", type="primary", use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("2. Explore Teses (Opcional)")
+    user_thesis = st.text_input("Insira sua tese ou ponto principal para explorar variações:")
+    explore_thesis_button = st.button("💡 Explorar Variações da Tese", use_container_width=True)
+
+# --- Análise de Jurisprudência ---
+if analyze_button and jurisprudence_text_area:
+    with st.spinner("🤖 A IA está analisando a jurisprudência... Por favor, aguarde."):
+        summary, keywords, ratio, simplified = mock_ai_analysis(jurisprudence_text_area)
+
+    if summary:
+        st.subheader("📊 Resultados da Análise da IA:")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("#### 📜 Resumo Inteligente")
+            st.success(summary)
+
+            st.markdown("#### 🔑 Palavras-chave e Teses Centrais")
+            if keywords:
+                cols_keywords = st.columns(min(4, len(keywords)))
+                for i, keyword in enumerate(keywords):
+                    cols_keywords[i % 4].info(f"🏷️ {keyword}")
+            else:
+                st.write("Nenhuma palavra-chave identificada.")
+
+        with col2:
+            st.markdown("#### 🎯 Ratio Decidendi (Razão de Decidir)")
+            st.info(ratio)
+
+            st.markdown("#### 🗣️ 'Tradução' para Linguagem Clara")
+            st.warning(simplified)
+
+        st.markdown("---")
+        st.subheader("❓ Pergunte sobre a Jurisprudência (Demonstração)")
+        user_question = st.text_input("Faça uma pergunta específica sobre o texto analisado:")
+        if user_question:
+            st.write(f"**Resposta da IA (simulada):** Para a pergunta '{user_question}', a análise sugere que [resposta simulada baseada no texto e na IA].")
+
+elif analyze_button:
+    st.warning("Por favor, cole o texto da jurisprudência na área indicada antes de analisar.")
+
+# --- Variações da Tese ---
+if explore_thesis_button:
+    if user_thesis:
+        with st.spinner("🧠 A IA está gerando variações da tese..."):
+            variations = mock_generate_argument_variations(user_thesis)
+        if variations:
+            st.subheader(f"💡 Variações e Contrapontos para '{user_thesis}':")
+            for i, var in enumerate(variations):
+                st.info(f"**Opção {i+1}:** {var}")
+        else:
+            st.info("Nenhuma variação gerada. Tente uma tese mais específica.")
+    else:
+        st.warning("Por favor, insira uma tese para explorar.")
+
+# --- Expansão: Grafo ---
+st.subheader("✨ Funcionalidades Avançadas (Em Desenvolvimento)")
+with st.expander("🗺️ Visualizar Conexões Jurisprudenciais (Exemplo)"):
+    st.write("Esta seção demonstraria como diferentes decisões se conectam.")
+    try:
+        st.graphviz_chart('''
+            digraph {
+                rankdir=LR;
+                node [shape=box, style="filled", color="skyblue"];
+                edge [color="gray40"];
+                acordao_A [label="Acórdão A\nTema Principal"];
+                acordao_B [label="Acórdão B\nCita Acórdão A"];
+                acordao_C [label="Acórdão C\nDistingue de A"];
+                acordao_A -> acordao_B [label=" citado por"];
+                acordao_A -> acordao_C [label=" distinguido por"];
+            }
+        ''')
+    except Exception as e:
+        st.caption(f"Erro ao exibir o grafo: {e}")
+    st.caption("Imagine aqui um grafo interativo mostrando as relações entre decisões analisadas!")
+
+# --- Carregar Variáveis de Ambiente ---
 load_dotenv()
 
-# --- 2. Funções Cacheadas para Carregar Modelos e Dados ---
-
+# --- Cache de Modelos e Dados ---
 @st.cache_resource
 def load_models_cached():
-    """Carrega o modelo de embedding e configura o LLM."""
     embedding_model = initialize_embedding_model()
     llm_model = configure_llm()
     return embedding_model, llm_model
 
-@st.cache_data # Mudei para @st.cache_data para a lista de documentos, pois não são "recursos" como modelos
+@st.cache_data
 def get_initial_documents_cached(data_file_path):
-    """Carrega os documentos do JSON original e retorna a lista para referência."""
     if not os.path.exists(data_file_path):
-        st.error(f"Arquivo JSON principal não encontrado em: {data_file_path}.")
+        st.error(f"Arquivo JSON principal não encontrado: {data_file_path}")
         return []
-    # Usa a função do rag_pipeline que agora lê o JSON original
-    # Esta função retorna uma lista de dicionários com "source", "text", "ementa_display_text", "full_metadata_origem"
-    loaded_docs = load_processes_from_original_json(data_file_path)
-    if not loaded_docs:
-         st.warning("Nenhum documento foi carregado do arquivo JSON original.")
-    return loaded_docs
+    return load_processes_from_original_json(data_file_path)
 
-@st.cache_resource # Vector store é um recurso
-def prepare_rag_components_cached(_embedding_model_ref, initial_documents):
-    """Prepara os componentes do RAG: chunks e vector store."""
+@st.cache_resource
+def prepare_rag_components_cached(embedding_model, initial_documents):
     if not initial_documents:
-        st.warning("Nenhum documento inicial fornecido para preparar os componentes RAG.")
         return None, []
-    # A função process_documents_for_rag espera a lista de initial_documents
-    # que já tem "source" e "text" (texto completo)
-    all_chunks_with_metadata = process_documents_for_rag(initial_documents)
-    if not all_chunks_with_metadata:
-        st.warning("Nenhum chunk de texto foi gerado. Verifique os dados e a lógica de segmentação.")
+    all_chunks = process_documents_for_rag(initial_documents)
+    if not all_chunks:
         return None, []
-    
-    vector_store_index, chunks_for_retrieval_with_metadata = create_vector_store(all_chunks_with_metadata, _embedding_model_ref)
+    index, chunks = create_vector_store(all_chunks, embedding_model)
+    return index, chunks
 
-    # Retorna o índice e a lista de chunks com metadados, que inclui o texto do chunk e os metadados associados
-    return vector_store_index, chunks_for_retrieval_with_metadata
-
-
-# --- 3. Carregar Modelos e Dados na Inicialização do App ---
-embedding_model_global = None
-llm_global = None
-vector_store_global = None
-# `all_chunks_ref_global` agora armazena os chunks com seus metadados associados
-all_chunks_ref_global = []
-# `initial_documents_global` armazena os documentos originais carregados com "source", "text", "ementa_display_text"
+# --- Inicialização ---
+embedding_model_global, llm_global = None, None
+vector_store_global, all_chunks_ref_global = None, []
 initial_documents_global = []
 
 try:
     embedding_model_global, llm_global = load_models_cached()
-
-    # Caminho para o SEU ÚNICO arquivo JSON original
-    # Certifique-se de que este arquivo JSON está na pasta 'data'
-    # Substitua 'SEU_ARQUIVO_JSON_COMPLETO.json' pelo nome real do seu arquivo.
     data_file_path = os.path.join(os.path.dirname(__file__), "data", "processo.json")
-
     initial_documents_global = get_initial_documents_cached(data_file_path)
 
-    if initial_documents_global: # Só prepara o RAG se os documentos foram carregados
-        vector_store_global, all_chunks_ref_global = prepare_rag_components_cached(embedding_model_global, initial_documents_global)
+    if initial_documents_global:
+        vector_store_global, all_chunks_ref_global = prepare_rag_components_cached(
+            embedding_model_global, initial_documents_global
+        )
     else:
-        st.error("Não foi possível carregar os documentos iniciais. O pipeline RAG não pode ser preparado.")
+        st.error("Documentos iniciais não foram carregados corretamente.")
 
 except Exception as e:
-    st.error(f"Erro crítico durante a inicialização dos modelos ou dados: {e}")
-    st.error("Verifique sua chave de API, a conexão com a internet e os arquivos de dados. Veja o console para mais detalhes.")
-    # st.stop() # Descomente se quiser parar o app em caso de falha total
+    st.error(f"Erro na inicialização: {e}")
 
-# --- 4. Interface do Usuário ---
-
-st.sidebar.header("Sobre o VeritasJuris IA")
-st.sidebar.info(
-    "Esta aplicação demonstra o uso de Inteligência Artificial Generativa (RAG) "
-    "para analisar jurisprudências. Faça uma pergunta sobre o conteúdo "
-    "dos documentos JSON carregados."
-)
-st.sidebar.warning("⚠️ Lembre-se: Esta é uma ferramenta de demonstração para o Hackathon Ibmec e não substitui a consultoria jurídica profissional.")
-
-# Exibir informações sobre os dados carregados
-if initial_documents_global:
-    st.sidebar.subheader(f"Documentos Carregados na Base:")
-    st.sidebar.caption(f"{len(initial_documents_global)} documento(s) principal(is) carregado(s) de:")
-    st.sidebar.code(os.path.basename(data_file_path), language=None)
-    if all_chunks_ref_global:
-        st.sidebar.caption(f"Gerados {len(all_chunks_ref_global)} chunks para busca.")
-    else:
-        st.sidebar.caption("Nenhum chunk gerado (verifique logs).")
-else:
-    st.sidebar.markdown("---")
-    st.sidebar.caption("Base de conhecimento (documentos) não carregada ou vazia.")
-    st.warning("A base de conhecimento não pôde ser carregada. Verifique as mensagens de erro e o console.")
-
+# --- Interface de Pergunta ---
 st.markdown("---")
-query = st.text_input("Digite sua pergunta sobre a jurisprudência carregada:", placeholder="Ex: Quais as implicações do RE XXXXX para a cobrança de ICMS sobre Y?")
+query = st.text_input("Digite sua pergunta sobre a jurisprudência carregada:",
+                      placeholder="Ex: Quais as implicações do RE XXXXX para a cobrança de ICMS sobre Y?")
 
 if st.button("Analisar e Responder", type="primary"):
     if not query:
         st.warning("Por favor, digite uma pergunta.")
-    elif vector_store_global is None or not all_chunks_ref_global or not initial_documents_global:
-        st.error("O sistema não está pronto para responder. A base de conhecimento não foi carregada ou processada corretamente.")
+    elif not vector_store_global or not all_chunks_ref_global:
+        st.error("Sistema ainda não está pronto. Verifique o carregamento inicial.")
     else:
-        with st.spinner("Buscando informações na jurisprudência e gerando sua resposta..."):
+        with st.spinner("Analisando e buscando respostas..."):
             try:
-                # retrieve_relevant_chunks agora usa all_chunks_ref_global, que são os chunks com metadados
-                relevant_chunks_data = retrieve_relevant_chunks(query, vector_store_global, all_chunks_ref_global, embedding_model_global, top_k=5) # Aumentei top_k para teste
-
-                # 1. GERAR E EXIBIR A RESPOSTA PRINCIPAL DA IA
+                relevant_chunks_data = retrieve_relevant_chunks(
+                    query, vector_store_global, all_chunks_ref_global,
+                    embedding_model_global, top_k=5
+                )
                 ai_response = generate_response_with_llm(query, relevant_chunks_data, llm_global)
                 st.subheader("Resposta do VeritasJuris IA:")
                 st.markdown(ai_response)
 
-                # 2. EXIBIR AS EMENTAS DOS JULGADOS DE REFERÊNCIA
                 if relevant_chunks_data:
                     st.markdown("---")
                     st.subheader("Ementas dos Documentos de Referência Citados:")
+                    source_files = list(set(chunk["metadata_chunk"]["source_document"] for chunk in relevant_chunks_data))
 
-                    # Coleta os nomes dos arquivos fontes dos chunks relevantes
-                    source_files_from_chunks = list(set(chunk_data["metadata_chunk"]["source_document"] for chunk_data in relevant_chunks_data))
-
-                    if not source_files_from_chunks:
-                        st.caption("Nenhuma fonte específica identificada nos chunks relevantes para exibir ementas.")
-                    else:
-                        displayed_ementas_count = 0
-                        for source_file_name in source_files_from_chunks:
-                            # Encontra o documento original na lista `initial_documents_global`
-                            # para pegar o `ementa_display_text` que foi extraído pela `load_processes_from_original_json`
-                            original_doc_for_ementa = next((doc for doc in initial_documents_global if doc['source'] == source_file_name), None)
-
-                            if original_doc_for_ementa:
-                                ementa_text = original_doc_for_ementa.get('ementa_display_text')
-                                if ementa_text and ementa_text != "Ementa não encontrada.":
-                                    with st.expander(f"Ver Ementa de: {source_file_name}", expanded=False):
-                                        st.markdown(ementa_text)
-                                    displayed_ementas_count += 1
-                                else:
-                                    with st.expander(f"Informações sobre: {source_file_name}", expanded=False):
-                                        st.caption(f"Ementa principal não encontrada ou não disponível para {source_file_name} durante o carregamento.")
+                    for file_name in source_files:
+                        original_doc = next((doc for doc in initial_documents_global if doc['source'] == file_name), None)
+                        if original_doc:
+                            ementa = original_doc.get('ementa_display_text', '')
+                            if ementa and ementa != "Ementa não encontrada.":
+                                with st.expander(f"Ver Ementa de: {file_name}"):
+                                    st.markdown(ementa)
                             else:
-                                 st.caption(f"Metadados do documento original '{source_file_name}' não encontrados na lista `initial_documents_global`.")
-                        
-                        if displayed_ementas_count == 0 and source_files_from_chunks:
-                            st.caption("Ementas não disponíveis para os documentos referenciados ou não foram extraídas corretamente.")
-
+                                st.caption(f"Ementa não disponível para: {file_name}")
+                        else:
+                            st.caption(f"Documento original não encontrado: {file_name}")
             except Exception as e:
-                st.error(f"Ocorreu um erro ao processar sua solicitação: {e}")
-                st.exception(e) # Mostra o traceback completo no Streamlit para depuração
-                st.error("Por favor, verifique o console para mais detalhes técnicos.")
-
-st.markdown("---")
-st.caption("Hackathon Ibmec - Desafio de IA Generativa - VeritasJuris")
+                st.error(f"Erro ao processar a pergunta: {e}")
